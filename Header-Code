@@ -1,0 +1,37 @@
+#ifndef LED_CONTROLLER_REBUILD_H
+#define LED_CONTROLLER_REBUILD_H
+
+#include <QMainWindow>
+#include <QSerialPort>  //Allows the use of SerialPort library within this file
+
+namespace Ui {
+class LED_Controller_Rebuild;
+}
+
+class LED_Controller_Rebuild : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit LED_Controller_Rebuild(QWidget *parent = 0);
+    ~LED_Controller_Rebuild();
+
+private slots:
+    void LED_Controller_Rebuild::updateLED(QString command); // Writes change to arduino
+
+    void on_horizontalSlider_valueChanged(int value);  // If Slider value changes
+
+    void on_horizontalSlider_2_valueChanged(int value);
+
+    void on_horizontalSlider_3_valueChanged(int value);
+
+private:
+    Ui::LED_Controller_Rebuild *ui;
+    QSerialPort *arduino; // Creates a pointer
+    static const quint16 arduino_vendor_id = 9025; //You need to find your own, see the "Test code".
+    static const quint16 arduino_product_id = 61;
+    QString arduino_name; // Obvious. Arduino's port name
+    bool is_available; // ... and if it's available
+};
+
+#endif // LED_CONTROLLER_REBUILD_H
