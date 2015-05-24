@@ -1,0 +1,102 @@
+#include "led_controller_rebuild.h"
+#include "ui_led_controller_rebuild.h"
+#include <QSerialPort>  // Allows the usage of Serial port library
+#include <QSerialPortInfo> // Library regarding serial port info
+#include <QDebug>  // Allows to dump info to console
+#include <QtWidgets> // Just for creation of a messagebox
+
+LED_Controller_Rebuild::LED_Controller_Rebuild(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::LED_Controller_Rebuild)
+{
+    ui->setupUi(this);
+
+    arduino_name = "";  // Set port name
+    is_available = false;  // Set availability
+    arduino = new QSerialPort;  // "arduino" as a new QSerialPort object
+    
+
+    // Get Serial info // !!USE THIS TO GET YOUR VENDOR AND PRODUCT ID!!
+
+    /*
+    qDebug() << QSerialPortInfo::availablePorts().length();
+        foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()) {
+            qDebug() << "Has Vendor ID? " << serialPortInfo.hasVendorIdentifier();
+            if(serialPortInfo.hasVendorIdentifier()) {
+                qDebug() << "Vendor ID = " << serialPortInfo.vendorIdentifier();
+            }
+            qDebug() << "Has Product ID? " << serialPortInfo.hasProductIdentifier();
+            if(serialPortInfo.hasProductIdentifier()) {
+                qDebug() << "Product ID = " << serialPortInfo.productIdentifier();
+            }
+        }
+
+      */
+      
+      // Get, and for each port, if it has ProductID and VendorID, if VendorID == arduino_vendor_id 
+      // AND if ProductID == arduino_product_id, then set arduino available and arduino's port name.
+    
+
+    foreach(const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts()) {
+    if(serialPortInfo.hasProductIdentifier()&&serialPortInfo.hasVendorIdentifier()) {
+        if(serialPortInfo.vendorIdentifier() == arduino_vendor_id && serialPortInfo.productIdentifier() == arduino_product_id) {
+            is_available = true;
+            arduino_name = serialPortInfo.portName();
+        }
+    }
+  }
+    // If it's available, set all neccesary settings
+    
+    if(is_available) {
+        arduino->setPortName(arduino_name);
+        arduino->open(QSerialPort::WriteOnly);
+        arduino->setBaudRate(QSerialPort::Baud9600);
+        arduino->setParity(QSerialPort::NoParity);
+        arduino->setFlowControl(QSerialPort::NoFlowControl);
+        arduino->setDataBits(QSerialPort::Data8);
+        arduino->setStopBits(QSerialPort::OneStop);
+    }
+    else {
+        QMessageBox::warning(this, "Port Error! :(", "Something went wrong with the port... probably should check that");
+    }
+}
+
+LED_Controller_Rebuild::~LED_Controller_Rebuild()
+{
+    delete ui;
+    
+    // THIS is the deconstructor (or destructor). All this does is says: If arduino's port is still open, close it.
+    if(arduino->isOpen()) {
+        arduino->close();
+    }
+}
+
+void LED_Controller_Rebuild::on_horizontalSlider_valueChanged(int value)
+{
+
+    // Set label's value equal to slider value. %1 is a kind of a variable. After that, it just calls 
+    // update function, which writes a%1, %1 representing current value. For example, a255;
+    
+    ui->label->setText(QString("<span style=\" font-size: 16pt; font-weight:600;\">%1</span>").arg(value));
+    LED_Controller_Rebuild::updateLED(QString("a%1").arg(value));
+}
+
+void LED_Controller_Rebuild::updateLED(QString command) {
+    if(arduino->isWritable()) {
+        arduino->write(command.toStdString().c_str());
+    } else {
+        qDebug() << "Couldn't Write to Serial";
+    }
+}
+
+void LED_Controller_Rebuild::on_horizontalSlider_2_valueChanged(int value)
+{
+    ui->label_2->setText(QString("<span style=\" font-size: 16pt; font-weight:600;\">%2</span>").arg(value));
+    LED_Controller_Rebuild::updateLED(QString("b%2").arg(value));
+}
+
+void LED_Controller_Rebuild::on_horizontalSlider_3_valueChanged(int value)
+{
+    ui->label_3->setText(QString("<span style=\" font-size: 16pt; font-weight:600;\">%3</span>").arg(value));
+    LED_Controller_Rebuild::updateLED(QString("c%3").arg(value));
+}
