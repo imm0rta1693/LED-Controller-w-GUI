@@ -1,0 +1,37 @@
+#define LED1 13
+#define LED2 9
+#define LED3 4
+
+void setup() {
+  pinMode(LED1, OUTPUT);
+  analogWrite(LED1, 0);
+  analogWrite(LED2, 0);
+  analogWrite(LED3, 0);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available()) {
+    char led_specifier = Serial.read();
+    int led_brightness = Serial.parseInt();
+    write_led(led_specifier, led_brightness);
+
+  }
+}
+
+void write_led(char led, int brightness) {
+  if (led == 'a') {
+    analogWrite(LED1, brightness);
+    return;
+  }
+  if (led == 'b') {
+    analogWrite(LED2, brightness);
+    return;
+  }
+  if (led == 'c') {
+    analogWrite(LED3, brightness);
+    return;
+  }
+
+  return;
+}
