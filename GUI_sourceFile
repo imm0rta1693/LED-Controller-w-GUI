@@ -1,0 +1,16 @@
+#include "led_controller_rebuild.h"
+#include <QApplication>
+
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    LED_Controller_Rebuild w;
+    
+    // Pretty much self-explanatory.
+    w.setWindowTitle("LED Controller Rebuild");
+    w.setFixedSize(500, 200);
+    
+    w.show();
+
+    return a.exec();
+}
